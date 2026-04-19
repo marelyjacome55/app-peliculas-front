@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
-import 'register_screen.dart';
 import '../services/auth_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmarPasswordController = TextEditingController();
 
   final AuthService _authService = AuthService();
 
   bool _cargando = false;
   bool _ocultarPassword = true;
+  bool _ocultarConfirmacion = true;
 
-  Future<void> _iniciarSesion() async {
+  Future<void> _registrar() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -28,21 +29,23 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _authService.login(
+      await _authService.register(
         username: _usernameController.text.trim(),
+        email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
       if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuario registrado correctamente')),
       );
+
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al iniciar sesión: $e')),
+        SnackBar(content: Text('Error al registrarse: $e')),
       );
     } finally {
       if (mounted) {
@@ -53,22 +56,18 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _abrirRegistro() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const RegisterScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Crear cuenta'),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
+              constraints: const BoxConstraints(maxWidth: 460),
               child: Card(
                 elevation: 6,
                 shape: RoundedRectangleBorder(
@@ -82,13 +81,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
-                          Icons.movie_filter_rounded,
+                          Icons.person_add_alt_1_rounded,
                           size: 64,
                           color: Color(0xFF6C63FF),
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'App Películas por ver',
+                          'Crear nueva cuenta',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -97,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          'Inicia sesión para ver y administrar tus películas',
+                          'Regístrate para guardar tus películas por ver',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.black54),
                         ),
@@ -110,7 +109,27 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Ingresa tu usuario';
+                              return 'Ingresa un usuario';
+                            }
+                            if (value.trim().length < 3) {
+                              return 'Debe tener al menos 3 caracteres';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Correo',
+                            prefixIcon: Icon(Icons.email_outlined),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Ingresa un correo';
+                            }
+                            if (!value.contains('@')) {
+                              return 'Ingresa un correo válido';
                             }
                             return null;
                           },
@@ -137,7 +156,40 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Ingresa tu contraseña';
+                              return 'Ingresa una contraseña';
+                            }
+                            if (value.trim().length < 6) {
+                              return 'Debe tener al menos 6 caracteres';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _confirmarPasswordController,
+                          obscureText: _ocultarConfirmacion,
+                          decoration: InputDecoration(
+                            labelText: 'Confirmar contraseña',
+                            prefixIcon: const Icon(Icons.verified_user_outlined),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _ocultarConfirmacion = !_ocultarConfirmacion;
+                                });
+                              },
+                              icon: Icon(
+                                _ocultarConfirmacion
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Confirma la contraseña';
+                            }
+                            if (value.trim() != _passwordController.text.trim()) {
+                              return 'Las contraseñas no coinciden';
                             }
                             return null;
                           },
@@ -146,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton.icon(
-                            onPressed: _cargando ? null : _iniciarSesion,
+                            onPressed: _cargando ? null : _registrar,
                             icon: _cargando
                                 ? const SizedBox(
                                     width: 18,
@@ -156,22 +208,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Icon(Icons.login),
+                                : const Icon(Icons.person_add_alt_1),
                             label: Text(
-                              _cargando ? 'Entrando...' : 'Iniciar sesión',
+                              _cargando ? 'Registrando...' : 'Crear cuenta',
                             ),
                           ),
                         ),
                         const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: _cargando ? null : _abrirRegistro,
-                          icon: const Icon(Icons.person_add_alt_1),
-                          label: const Text('Crear cuenta'),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Usa una cuenta registrada desde tu API',
-                          style: TextStyle(color: Colors.black45),
+                        TextButton(
+                          onPressed: _cargando
+                              ? null
+                              : () {
+                                  Navigator.pop(context);
+                                },
+                          child: const Text('Ya tengo cuenta'),
                         ),
                       ],
                     ),

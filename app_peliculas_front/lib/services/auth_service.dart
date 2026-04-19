@@ -33,6 +33,29 @@ class AuthService {
     _token = data['accessToken'];
   }
 
+  Future<void> register({
+    required String username,
+    required String email,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/auth/signup'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'username': username,
+        'email': email,
+        'password': password,
+        'role': ['user'],
+      }),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Error ${response.statusCode}: ${response.body}');
+    }
+  }
+
   void logout() {
     _token = null;
   }
