@@ -6,11 +6,8 @@ import '../facades/movie_app_facade.dart';
 import '../network/api_client.dart';
 import '../security/session_manager.dart';
 
-/// Fábrica encargada de construir las dependencias principales.
-///
-/// Patrón creacional: Factory.
-/// Centraliza la creación de objetos como ApiClient, Services,
-/// Repository y Facade para evitar instanciarlos manualmente en la UI.
+/// PATRÓN: Factory
+/// Centraliza composición de dependencias (ApiClient, Services, Repository, Facade).
 class AppFactory {
   static MovieAppFacade createMovieAppFacade() {
     final sessionManager = SessionManager();

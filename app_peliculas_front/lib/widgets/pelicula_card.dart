@@ -5,12 +5,8 @@ import '../core/factories/reaccion_ui_factory.dart';
 import '../models/pelicula.dart';
 import '../models/reaccion_pelicula.dart';
 
-/// Tarjeta visual para mostrar una película y sus acciones principales.
-///
-/// Aquí se integran:
-/// - comentario personal privado
-/// - varias reacciones por película
-/// - contador de reacciones por película
+/// PATRÓN: Facade + Factory Method
+/// Usa MovieAppFacade para operaciones y ReaccionUiFactory para UI consistente.
 class PeliculaCard extends StatefulWidget {
   final Pelicula pelicula;
   final MovieAppFacade facade;

@@ -6,13 +6,8 @@ import '../../models/resumen_reaccion.dart';
 import '../../repositories/pelicula_repository.dart';
 import '../../services/auth_service.dart';
 
-/// Fachada principal de la aplicación de películas.
-///
-/// PATRÓN FACADE:
-/// Simplifica el acceso desde las pantallas a autenticación, películas,
-/// comentarios personales y reacciones.
-/// Así la UI no necesita conocer directamente AuthService, PeliculaService
-/// ni Repository.
+/// PATRÓN: Facade
+/// Entrada única para autenticación, películas y reacciones. Desacopla UI de servicios.
 class MovieAppFacade {
   MovieAppFacade({
     required AuthService authService,

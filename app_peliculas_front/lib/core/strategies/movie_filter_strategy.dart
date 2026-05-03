@@ -1,11 +1,8 @@
 import '../../models/pelicula.dart';
 import '../facades/movie_app_facade.dart';
 
-/// Contrato para aplicar filtros de películas.
-///
-/// Patrón de comportamiento: Strategy.
-/// Permite cambiar el criterio de consulta sin llenar la pantalla principal
-/// con demasiados if/switch.
+/// PATRÓN: Strategy
+/// Encapsula criterios de filtrado. Evita condicionales complejos en la UI.
 abstract class MovieFilterStrategy {
   Future<List<Pelicula>> obtenerPeliculas(MovieAppFacade facade);
 }

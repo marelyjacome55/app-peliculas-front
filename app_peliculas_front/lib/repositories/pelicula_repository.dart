@@ -5,11 +5,8 @@ import '../models/reaccion_pelicula.dart';
 import '../models/resumen_reaccion.dart';
 import '../services/pelicula_service.dart';
 
-/// Contrato de acceso a datos para operaciones de peliculas.
-///
-/// PATRÓN REPOSITORY:
-/// Esta abstraccion desacopla la UI de la fuente concreta de datos.
-/// La interfaz no llama directamente a PeliculaService.
+/// PATRÓN: Repository
+/// Desacopla la UI de la fuente real de datos. Permite intercambiar implementación.
 abstract class PeliculaRepository {
   Future<List<Pelicula>> obtenerPeliculas();
 

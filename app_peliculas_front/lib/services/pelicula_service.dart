@@ -9,7 +9,8 @@ import '../models/pelicula.dart';
 import '../models/reaccion_pelicula.dart';
 import '../models/resumen_reaccion.dart';
 
-/// Servicio remoto para operaciones CRUD, filtros, comentarios y reacciones.
+/// PATRÓN: Service Layer
+/// Centraliza la comunicación con la API. Evita que la UI haga peticiones HTTP directamente.
 class PeliculaService {
   PeliculaService({
     ApiClient? apiClient,

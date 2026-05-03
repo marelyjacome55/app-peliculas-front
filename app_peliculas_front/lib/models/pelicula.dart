@@ -1,4 +1,5 @@
-/// Entidad de dominio que representa una pelicula registrada por el usuario.
+/// PATRÓN: Factory Method
+/// fromJson centraliza la creación desde JSON.
 class Pelicula {
   final int? id;
   final String nombre;

@@ -3,7 +3,8 @@ import 'dart:convert';
 import '../core/network/api_client.dart';
 import '../core/security/session_manager.dart';
 
-/// Servicio de autenticacion encargado de login, registro y cierre de sesion.
+/// PATRÓN: Service Layer
+/// Gestiona autenticación. Persiste el token en `SessionManager`.
 class AuthService {
   AuthService({ApiClient? apiClient, SessionManager? sessionManager})
       : _apiClient = apiClient ?? ApiClient(),

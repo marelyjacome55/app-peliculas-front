@@ -1,10 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
-/// Adapta una imagen seleccionada con ImagePicker al formato MultipartFile.
-///
-/// Patrón estructural: Adapter.
-/// Convierte el objeto XFile de Flutter al formato que necesita http.MultipartRequest.
+/// PATRÓN: Adapter
+/// Convierte XFile (ImagePicker) a MultipartFile para subida HTTP.
 class MultipartImageAdapter {
   const MultipartImageAdapter();
 

@@ -64,9 +64,8 @@ extension TipoReaccionExtension on TipoReaccion {
   }
 }
 
-/// PATRÓN DTO / MODEL:
-/// Este modelo representa una reacción recibida desde la API.
-/// Evita usar mapas JSON directamente en la interfaz.
+/// PATRÓN: DTO / Factory Method
+/// Representa reacción de API. fromJson centraliza creación desde JSON.
 class ReaccionPelicula {
   final TipoReaccion tipoReaccion;
   final String nombre;
@@ -76,8 +75,6 @@ class ReaccionPelicula {
     required this.nombre,
   });
 
-  /// PATRÓN FACTORY METHOD:
-  /// Centraliza la creación de una reacción desde JSON.
   factory ReaccionPelicula.fromJson(Map<String, dynamic> json) {
     final tipoApi = (json['tipoReaccion'] ?? '').toString();
 

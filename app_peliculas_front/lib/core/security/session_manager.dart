@@ -1,8 +1,5 @@
-/// Administra la sesión del usuario autenticado.
-///
-/// Patrón de diseño: Singleton.
-/// Se usa una sola instancia compartida para guardar el token JWT
-/// y permitir que los servicios lo consulten desde cualquier parte del frontend.
+/// PATRÓN: Singleton
+/// Única instancia para persistir token JWT. Accesible desde cualquier capa.
 class SessionManager {
   static final SessionManager _instance = SessionManager._internal();
 

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../models/reaccion_pelicula.dart';
 
-/// PATRÓN FACTORY METHOD:
-/// Esta fábrica centraliza la creación visual de cada reacción.
-/// Evita repetir íconos, colores y textos en diferentes pantallas.
+/// PATRÓN: Factory Method
+/// Centraliza iconos y colores por reacción. Evita duplicación visual.
 class ReaccionUiFactory {
   static IconData icono(TipoReaccion tipo) {
     switch (tipo) {

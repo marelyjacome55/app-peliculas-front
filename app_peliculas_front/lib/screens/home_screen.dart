@@ -10,7 +10,8 @@ import 'mis_reacciones_screen.dart';
 /// Filtro de estado usado por la pantalla principal.
 enum FiltroVista { todas, vistas, pendientes }
 
-/// Pantalla principal de gestion de peliculas.
+/// PATRÓN: Strategy + Facade
+/// Delega filtrado a estrategia; operaciones a Facade.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.facade});
 

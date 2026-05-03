@@ -4,7 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import '../models/pelicula.dart';
 import '../core/facades/movie_app_facade.dart'; 
 
-/// Bottom sheet con formulario para crear o editar peliculas.
+/// PATRÓN: Facade + Adapter
+/// Delega persistencia a Facade. Las imágenes se convierten mediante Adapter.
 class PeliculaFormSheet extends StatefulWidget {
   final Pelicula? pelicula;
   final MovieAppFacade facade;

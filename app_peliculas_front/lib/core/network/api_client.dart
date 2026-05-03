@@ -5,11 +5,8 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../security/session_manager.dart';
 
-/// Cliente HTTP centralizado para comunicarse con la API.
-///
-/// Patrón estructural: Facade técnico / cliente centralizado.
-/// Simplifica las peticiones HTTP para que los servicios no repitan
-/// lógica de URL, headers, token y validación de respuestas.
+/// PATRÓN: Facade (Cliente HTTP)
+/// Centraliza URIs, headers (auth) y validación de respuestas HTTP.
 class ApiClient {
   ApiClient({
     SessionManager? sessionManager,

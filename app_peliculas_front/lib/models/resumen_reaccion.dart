@@ -1,8 +1,7 @@
 import 'reaccion_pelicula.dart';
 
-/// PATRÓN DTO / MODEL:
-/// Este modelo representa el resumen estadístico de una reacción.
-/// Se usará en la pantalla "Mis reacciones".
+/// PATRÓN: DTO / Factory Method
+/// Resumen estadístico de reacción. fromJson convierte datos de API.
 class ResumenReaccion {
   final TipoReaccion tipoReaccion;
   final String nombre;
@@ -14,8 +13,6 @@ class ResumenReaccion {
     required this.total,
   });
 
-  /// PATRÓN FACTORY METHOD:
-  /// Centraliza la conversión desde JSON hacia un objeto de la app.
   factory ResumenReaccion.fromJson(Map<String, dynamic> json) {
     final tipoApi = (json['tipoReaccion'] ?? '').toString();
 

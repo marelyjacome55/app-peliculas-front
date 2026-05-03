@@ -6,11 +6,8 @@ import '../models/pelicula.dart';
 import '../models/reaccion_pelicula.dart';
 import '../models/resumen_reaccion.dart';
 
-/// Pantalla de estadísticas y colecciones de reacciones.
-///
-/// PATRÓN FACADE:
-/// Esta pantalla no llama directamente al servicio ni al repositorio.
-/// Usa MovieAppFacade para obtener el resumen y las películas por reacción.
+/// PATRÓN: Facade
+/// Accede a resumen y colecciones de reacciones sin conocer servicios internos.
 class MisReaccionesScreen extends StatefulWidget {
   const MisReaccionesScreen({
     super.key,
