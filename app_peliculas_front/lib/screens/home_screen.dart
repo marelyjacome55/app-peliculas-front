@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../core/facades/movie_app_facade.dart';
+import '../core/strategies/movie_filter_strategy.dart';
 import '../models/pelicula.dart';
 import '../widgets/pelicula_card.dart';
 import '../widgets/pelicula_form_sheet.dart';
-import '../core/strategies/movie_filter_strategy.dart';
+import 'mis_reacciones_screen.dart';
 
 /// Filtro de estado usado por la pantalla principal.
 enum FiltroVista { todas, vistas, pendientes }
@@ -34,56 +35,56 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Carga peliculas aplicando el patrón Strategy.
-/// La pantalla no decide directamente cómo consultar; delega el criterio
-/// a una estrategia concreta.
-Future<void> _cargarPeliculas() async {
-  setState(() {
-    _cargando = true;
-    _error = null;
-  });
+  /// La pantalla no decide directamente cómo consultar; delega el criterio
+  /// a una estrategia concreta.
+  Future<void> _cargarPeliculas() async {
+    setState(() {
+      _cargando = true;
+      _error = null;
+    });
 
-  try {
-    final textoBusqueda = _buscarController.text.trim();
+    try {
+      final textoBusqueda = _buscarController.text.trim();
 
-    late final MovieFilterStrategy estrategia;
+      late final MovieFilterStrategy estrategia;
 
-    if (textoBusqueda.isNotEmpty) {
-      estrategia = SearchMoviesStrategy(textoBusqueda);
-    } else {
-      switch (_filtro) {
-        case FiltroVista.todas:
-          estrategia = AllMoviesStrategy();
-          break;
-        case FiltroVista.vistas:
-          estrategia = WatchedMoviesStrategy();
-          break;
-        case FiltroVista.pendientes:
-          estrategia = PendingMoviesStrategy();
-          break;
+      if (textoBusqueda.isNotEmpty) {
+        estrategia = SearchMoviesStrategy(textoBusqueda);
+      } else {
+        switch (_filtro) {
+          case FiltroVista.todas:
+            estrategia = AllMoviesStrategy();
+            break;
+          case FiltroVista.vistas:
+            estrategia = WatchedMoviesStrategy();
+            break;
+          case FiltroVista.pendientes:
+            estrategia = PendingMoviesStrategy();
+            break;
+        }
+      }
+
+      final peliculas = await estrategia.obtenerPeliculas(widget.facade);
+
+      if (!mounted) return;
+
+      setState(() {
+        _peliculas = peliculas;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _error = 'No se pudieron cargar las películas.\n$e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _cargando = false;
+        });
       }
     }
-
-    final peliculas = await estrategia.obtenerPeliculas(widget.facade);
-
-    if (!mounted) return;
-
-    setState(() {
-      _peliculas = peliculas;
-    });
-  } catch (e) {
-    if (!mounted) return;
-
-    setState(() {
-      _error = 'No se pudieron cargar las películas.\n$e';
-    });
-  } finally {
-    if (mounted) {
-      setState(() {
-        _cargando = false;
-      });
-    }
   }
-}
 
   /// Abre el formulario para crear o editar y recarga si hubo cambios.
   Future<void> _abrirFormulario([Pelicula? pelicula]) async {
@@ -162,6 +163,17 @@ Future<void> _cargarPeliculas() async {
         SnackBar(content: Text('Error al cambiar estado: $e')),
       );
     }
+  }
+
+  void _abrirMisReacciones() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MisReaccionesScreen(
+          facade: widget.facade,
+        ),
+      ),
+    );
   }
 
   @override
@@ -251,6 +263,13 @@ Future<void> _cargarPeliculas() async {
                             icon: const Icon(Icons.refresh),
                             label: const Text('Actualizar'),
                           ),
+                          OutlinedButton.icon(
+                            onPressed: _abrirMisReacciones,
+                            icon: const Icon(
+                              Icons.collections_bookmark_outlined,
+                            ),
+                            label: const Text('Mis reacciones'),
+                          ),
                         ],
                       ),
                     ],
@@ -287,13 +306,14 @@ Future<void> _cargarPeliculas() async {
                     separatorBuilder: (_, __) => const SizedBox(height: 14),
                     itemBuilder: (_, index) {
                       final pelicula = _peliculas[index];
+
                       return PeliculaCard(
                         pelicula: pelicula,
                         facade: widget.facade,
                         onEditar: () => _abrirFormulario(pelicula),
                         onEliminar: () => _eliminarPelicula(pelicula),
                         onCambiarVista: () => _cambiarVista(pelicula),
-                        );
+                      );
                     },
                   ),
                 ),
