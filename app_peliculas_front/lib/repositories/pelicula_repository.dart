@@ -1,22 +1,22 @@
 import 'package:image_picker/image_picker.dart';
 
 import '../models/pelicula.dart';
+import '../models/reaccion_pelicula.dart';
+import '../models/resumen_reaccion.dart';
 import '../services/pelicula_service.dart';
 
 /// Contrato de acceso a datos para operaciones de peliculas.
 ///
+/// PATRÓN REPOSITORY:
 /// Esta abstraccion desacopla la UI de la fuente concreta de datos.
+/// La interfaz no llama directamente a PeliculaService.
 abstract class PeliculaRepository {
-  /// Obtiene el listado completo de peliculas.
   Future<List<Pelicula>> obtenerPeliculas();
 
-  /// Busca peliculas por coincidencia de nombre.
   Future<List<Pelicula>> buscarPorNombre(String nombre);
 
-  /// Filtra peliculas por su estado de visualizacion.
   Future<List<Pelicula>> filtrarPorVista(bool vista);
 
-  /// Crea una nueva pelicula y devuelve el recurso persistido.
   Future<Pelicula> crearPelicula({
     required String nombre,
     required String genero,
@@ -25,7 +25,6 @@ abstract class PeliculaRepository {
     required XFile imagen,
   });
 
-  /// Edita una pelicula existente y devuelve la version actualizada.
   Future<Pelicula> editarPelicula({
     required int id,
     required String nombre,
@@ -35,11 +34,32 @@ abstract class PeliculaRepository {
     XFile? imagen,
   });
 
-  /// Elimina una pelicula por identificador.
   Future<void> eliminarPelicula(int id);
 
-  /// Cambia el estado vista/pendiente de una pelicula.
   Future<Pelicula> cambiarEstadoVista(int id, bool vista);
+
+  Future<Pelicula> actualizarComentarioPersonal({
+    required int id,
+    required String comentarioPersonal,
+  });
+
+  Future<List<ReaccionPelicula>> obtenerReaccionesDePelicula(int id);
+
+  Future<List<ReaccionPelicula>> agregarReaccion({
+    required int id,
+    required TipoReaccion tipoReaccion,
+  });
+
+  Future<List<ReaccionPelicula>> eliminarReaccion({
+    required int id,
+    required TipoReaccion tipoReaccion,
+  });
+
+  Future<List<ResumenReaccion>> obtenerMisReacciones();
+
+  Future<List<Pelicula>> obtenerPeliculasPorReaccion(
+    TipoReaccion tipoReaccion,
+  );
 }
 
 /// Implementacion remota del repositorio que delega en [PeliculaService].
@@ -108,5 +128,55 @@ class RemotePeliculaRepository implements PeliculaRepository {
   @override
   Future<Pelicula> cambiarEstadoVista(int id, bool vista) {
     return _service.cambiarEstadoVista(id, vista);
+  }
+
+  @override
+  Future<Pelicula> actualizarComentarioPersonal({
+    required int id,
+    required String comentarioPersonal,
+  }) {
+    return _service.actualizarComentarioPersonal(
+      id: id,
+      comentarioPersonal: comentarioPersonal,
+    );
+  }
+
+  @override
+  Future<List<ReaccionPelicula>> obtenerReaccionesDePelicula(int id) {
+    return _service.obtenerReaccionesDePelicula(id);
+  }
+
+  @override
+  Future<List<ReaccionPelicula>> agregarReaccion({
+    required int id,
+    required TipoReaccion tipoReaccion,
+  }) {
+    return _service.agregarReaccion(
+      id: id,
+      tipoReaccion: tipoReaccion,
+    );
+  }
+
+  @override
+  Future<List<ReaccionPelicula>> eliminarReaccion({
+    required int id,
+    required TipoReaccion tipoReaccion,
+  }) {
+    return _service.eliminarReaccion(
+      id: id,
+      tipoReaccion: tipoReaccion,
+    );
+  }
+
+  @override
+  Future<List<ResumenReaccion>> obtenerMisReacciones() {
+    return _service.obtenerMisReacciones();
+  }
+
+  @override
+  Future<List<Pelicula>> obtenerPeliculasPorReaccion(
+    TipoReaccion tipoReaccion,
+  ) {
+    return _service.obtenerPeliculasPorReaccion(tipoReaccion);
   }
 }

@@ -1,13 +1,16 @@
 import 'package:image_picker/image_picker.dart';
 
 import '../../models/pelicula.dart';
+import '../../models/reaccion_pelicula.dart';
+import '../../models/resumen_reaccion.dart';
 import '../../repositories/pelicula_repository.dart';
 import '../../services/auth_service.dart';
 
 /// Fachada principal de la aplicación de películas.
 ///
-/// Patrón estructural: Facade.
-/// Simplifica el acceso desde las pantallas a autenticación y películas.
+/// PATRÓN FACADE:
+/// Simplifica el acceso desde las pantallas a autenticación, películas,
+/// comentarios personales y reacciones.
 /// Así la UI no necesita conocer directamente AuthService, PeliculaService
 /// ni Repository.
 class MovieAppFacade {
@@ -102,5 +105,49 @@ class MovieAppFacade {
 
   Future<Pelicula> cambiarEstadoVista(int id, bool vista) {
     return _peliculaRepository.cambiarEstadoVista(id, vista);
+  }
+
+  Future<Pelicula> actualizarComentarioPersonal({
+    required int id,
+    required String comentarioPersonal,
+  }) {
+    return _peliculaRepository.actualizarComentarioPersonal(
+      id: id,
+      comentarioPersonal: comentarioPersonal,
+    );
+  }
+
+  Future<List<ReaccionPelicula>> obtenerReaccionesDePelicula(int id) {
+    return _peliculaRepository.obtenerReaccionesDePelicula(id);
+  }
+
+  Future<List<ReaccionPelicula>> agregarReaccion({
+    required int id,
+    required TipoReaccion tipoReaccion,
+  }) {
+    return _peliculaRepository.agregarReaccion(
+      id: id,
+      tipoReaccion: tipoReaccion,
+    );
+  }
+
+  Future<List<ReaccionPelicula>> eliminarReaccion({
+    required int id,
+    required TipoReaccion tipoReaccion,
+  }) {
+    return _peliculaRepository.eliminarReaccion(
+      id: id,
+      tipoReaccion: tipoReaccion,
+    );
+  }
+
+  Future<List<ResumenReaccion>> obtenerMisReacciones() {
+    return _peliculaRepository.obtenerMisReacciones();
+  }
+
+  Future<List<Pelicula>> obtenerPeliculasPorReaccion(
+    TipoReaccion tipoReaccion,
+  ) {
+    return _peliculaRepository.obtenerPeliculasPorReaccion(tipoReaccion);
   }
 }

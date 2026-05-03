@@ -6,6 +6,7 @@ class Pelicula {
   final String genero;
   final double calificacion;
   final bool vista;
+  final String comentarioPersonal;
 
   const Pelicula({
     this.id,
@@ -14,6 +15,7 @@ class Pelicula {
     required this.genero,
     required this.calificacion,
     required this.vista,
+    this.comentarioPersonal = '',
   });
 
   /// Patrón creacional: Factory Method.
@@ -29,6 +31,7 @@ class Pelicula {
       genero: (json['genero'] ?? '').toString(),
       calificacion: (json['calificacion'] as num?)?.toDouble() ?? 0.0,
       vista: json['vista'] as bool? ?? json['visto'] as bool? ?? false,
+      comentarioPersonal: (json['comentarioPersonal'] ?? '').toString(),
     );
   }
 
@@ -40,6 +43,27 @@ class Pelicula {
       'genero': genero,
       'calificacion': calificacion,
       'vista': vista,
+      'comentarioPersonal': comentarioPersonal,
     };
+  }
+
+  Pelicula copyWith({
+    int? id,
+    String? nombre,
+    String? portada,
+    String? genero,
+    double? calificacion,
+    bool? vista,
+    String? comentarioPersonal,
+  }) {
+    return Pelicula(
+      id: id ?? this.id,
+      nombre: nombre ?? this.nombre,
+      portada: portada ?? this.portada,
+      genero: genero ?? this.genero,
+      calificacion: calificacion ?? this.calificacion,
+      vista: vista ?? this.vista,
+      comentarioPersonal: comentarioPersonal ?? this.comentarioPersonal,
+    );
   }
 }

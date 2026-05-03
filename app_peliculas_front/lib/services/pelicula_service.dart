@@ -6,8 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import '../core/adapters/multipart_image_adapter.dart';
 import '../core/network/api_client.dart';
 import '../models/pelicula.dart';
+import '../models/reaccion_pelicula.dart';
+import '../models/resumen_reaccion.dart';
 
-/// Servicio remoto para operaciones CRUD y filtros de peliculas.
+/// Servicio remoto para operaciones CRUD, filtros, comentarios y reacciones.
 class PeliculaService {
   PeliculaService({
     ApiClient? apiClient,
@@ -126,5 +128,72 @@ class PeliculaService {
       body: const {},
     );
     return Pelicula.fromJson(jsonDecode(response.body));
+  }
+
+  /// Actualiza el comentario personal privado de una película.
+  Future<Pelicula> actualizarComentarioPersonal({
+    required int id,
+    required String comentarioPersonal,
+  }) async {
+    final response = await _apiClient.patch(
+      '/api/peliculas/$id/comentario',
+      body: {
+        'comentarioPersonal': comentarioPersonal,
+      },
+    );
+
+    return Pelicula.fromJson(jsonDecode(response.body));
+  }
+
+  /// Obtiene las reacciones seleccionadas de una película.
+  Future<List<ReaccionPelicula>> obtenerReaccionesDePelicula(int id) async {
+    final response = await _apiClient.get('/api/peliculas/$id/reacciones');
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((e) => ReaccionPelicula.fromJson(e)).toList();
+  }
+
+  /// Agrega una reacción a una película.
+  Future<List<ReaccionPelicula>> agregarReaccion({
+    required int id,
+    required TipoReaccion tipoReaccion,
+  }) async {
+    final response = await _apiClient.post(
+      '/api/peliculas/$id/reacciones/${tipoReaccion.apiValue}',
+    );
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((e) => ReaccionPelicula.fromJson(e)).toList();
+  }
+
+  /// Elimina una reacción de una película.
+  Future<List<ReaccionPelicula>> eliminarReaccion({
+    required int id,
+    required TipoReaccion tipoReaccion,
+  }) async {
+    final response = await _apiClient.delete(
+      '/api/peliculas/$id/reacciones/${tipoReaccion.apiValue}',
+    );
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((e) => ReaccionPelicula.fromJson(e)).toList();
+  }
+
+  /// Obtiene el resumen estadístico de la pantalla "Mis reacciones".
+  Future<List<ResumenReaccion>> obtenerMisReacciones() async {
+    final response = await _apiClient.get('/api/mis-reacciones');
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((e) => ResumenReaccion.fromJson(e)).toList();
+  }
+
+  /// Obtiene las películas que pertenecen a una colección de reacción.
+  Future<List<Pelicula>> obtenerPeliculasPorReaccion(
+    TipoReaccion tipoReaccion,
+  ) async {
+    final response = await _apiClient.get(
+      '/api/mis-reacciones/${tipoReaccion.apiValue}',
+    );
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((e) => Pelicula.fromJson(e)).toList();
   }
 }
