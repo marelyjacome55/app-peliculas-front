@@ -5,8 +5,14 @@ import '../core/factories/reaccion_ui_factory.dart';
 import '../models/pelicula.dart';
 import '../models/reaccion_pelicula.dart';
 
-/// PATRÓN: Facade + Factory Method
-/// Usa MovieAppFacade para operaciones y ReaccionUiFactory para UI consistente.
+/// Tarjeta visual para mostrar una película registrada por el usuario.
+///
+/// PATRÓN: Facade
+/// Usa MovieAppFacade para comunicarse con la lógica de la app sin llamar
+/// directamente a servicios o repositorios.
+///
+/// PATRÓN: Factory Method
+/// Usa ReaccionUiFactory para obtener íconos y colores de cada reacción.
 class PeliculaCard extends StatefulWidget {
   final Pelicula pelicula;
   final MovieAppFacade facade;
@@ -114,6 +120,42 @@ class _PeliculaCardState extends State<PeliculaCard> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al guardar comentario: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _guardandoComentario = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _eliminarComentarioPersonal() async {
+    final id = widget.pelicula.id;
+    if (id == null) return;
+
+    setState(() {
+      _guardandoComentario = true;
+    });
+
+    try {
+      _comentarioController.clear();
+
+      await widget.facade.actualizarComentarioPersonal(
+        id: id,
+        comentarioPersonal: '',
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comentario personal eliminado')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar comentario: $e')),
       );
     } finally {
       if (mounted) {
@@ -302,19 +344,28 @@ class _PeliculaCardState extends State<PeliculaCard> {
           ),
         ),
         const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerRight,
-          child: OutlinedButton.icon(
-            onPressed: _guardandoComentario ? null : _guardarComentario,
-            icon: _guardandoComentario
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.save_outlined),
-            label: const Text('Guardar comentario'),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton.icon(
+              onPressed:
+                  _guardandoComentario ? null : _eliminarComentarioPersonal,
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Eliminar'),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: _guardandoComentario ? null : _guardarComentario,
+              icon: _guardandoComentario
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: const Text('Guardar comentario'),
+            ),
+          ],
         ),
       ],
     );
@@ -366,7 +417,6 @@ class _PeliculaCardState extends State<PeliculaCard> {
     );
   }
 
-  /// Construye el placeholder cuando la portada no existe o falla.
   Widget _imagenFallback() {
     return Container(
       width: 105,
