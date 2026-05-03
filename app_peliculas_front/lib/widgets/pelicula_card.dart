@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/pelicula.dart';
 
+/// Tarjeta visual para mostrar una pelicula y sus acciones principales.
 class PeliculaCard extends StatelessWidget {
   final Pelicula pelicula;
   final VoidCallback onEditar;
@@ -67,7 +68,7 @@ class PeliculaCard extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: estadoColor.withOpacity(0.12),
+                          color: estadoColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
@@ -120,6 +121,7 @@ class PeliculaCard extends StatelessWidget {
     );
   }
 
+  /// Construye el placeholder cuando la portada no existe o falla.
   Widget _imagenFallback() {
     return Container(
       width: 105,

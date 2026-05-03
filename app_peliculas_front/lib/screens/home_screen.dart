@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../core/facades/movie_app_facade.dart';
 import '../models/pelicula.dart';
-import '../repositories/pelicula_repository.dart';
 import '../widgets/pelicula_card.dart';
 import '../widgets/pelicula_form_sheet.dart';
+import '../core/strategies/movie_filter_strategy.dart';
 
+/// Filtro de estado usado por la pantalla principal.
 enum FiltroVista { todas, vistas, pendientes }
 
+/// Pantalla principal de gestion de peliculas.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.facade});
+
+  final MovieAppFacade facade;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final PeliculaRepository _repository = PeliculaRepository();
   final TextEditingController _buscarController = TextEditingController();
 
   List<Pelicula> _peliculas = [];
@@ -29,48 +33,59 @@ class _HomeScreenState extends State<HomeScreen> {
     _cargarPeliculas();
   }
 
-  Future<void> _cargarPeliculas() async {
-    setState(() {
-      _cargando = true;
-      _error = null;
-    });
+  /// Carga peliculas aplicando el patrón Strategy.
+/// La pantalla no decide directamente cómo consultar; delega el criterio
+/// a una estrategia concreta.
+Future<void> _cargarPeliculas() async {
+  setState(() {
+    _cargando = true;
+    _error = null;
+  });
 
-    try {
-      List<Pelicula> peliculas;
-      final textoBusqueda = _buscarController.text.trim();
+  try {
+    final textoBusqueda = _buscarController.text.trim();
 
-      if (textoBusqueda.isNotEmpty) {
-        peliculas = await _repository.buscarPorNombre(textoBusqueda);
-      } else {
-        switch (_filtro) {
-          case FiltroVista.todas:
-            peliculas = await _repository.obtenerPeliculas();
-            break;
-          case FiltroVista.vistas:
-            peliculas = await _repository.filtrarPorVista(true);
-            break;
-          case FiltroVista.pendientes:
-            peliculas = await _repository.filtrarPorVista(false);
-            break;
-        }
-      }
+    late final MovieFilterStrategy estrategia;
 
-      setState(() {
-        _peliculas = peliculas;
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'No se pudieron cargar las películas.\n$e';
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _cargando = false;
-        });
+    if (textoBusqueda.isNotEmpty) {
+      estrategia = SearchMoviesStrategy(textoBusqueda);
+    } else {
+      switch (_filtro) {
+        case FiltroVista.todas:
+          estrategia = AllMoviesStrategy();
+          break;
+        case FiltroVista.vistas:
+          estrategia = WatchedMoviesStrategy();
+          break;
+        case FiltroVista.pendientes:
+          estrategia = PendingMoviesStrategy();
+          break;
       }
     }
-  }
 
+    final peliculas = await estrategia.obtenerPeliculas(widget.facade);
+
+    if (!mounted) return;
+
+    setState(() {
+      _peliculas = peliculas;
+    });
+  } catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      _error = 'No se pudieron cargar las películas.\n$e';
+    });
+  } finally {
+    if (mounted) {
+      setState(() {
+        _cargando = false;
+      });
+    }
+  }
+}
+
+  /// Abre el formulario para crear o editar y recarga si hubo cambios.
   Future<void> _abrirFormulario([Pelicula? pelicula]) async {
     final bool? actualizado = await showModalBottomSheet<bool>(
       context: context,
@@ -78,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => PeliculaFormSheet(
         pelicula: pelicula,
-        repository: _repository,
+        facade: widget.facade,
       ),
     );
 
@@ -87,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// Solicita confirmacion y elimina la pelicula seleccionada.
   Future<void> _eliminarPelicula(Pelicula pelicula) async {
     final bool? confirmar = await showDialog<bool>(
       context: context,
@@ -109,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (confirmar != true) return;
 
     try {
-      await _repository.eliminarPelicula(pelicula.id!);
+      await widget.facade.eliminarPelicula(pelicula.id!);
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -125,9 +141,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// Cambia entre estado vista/pendiente para una pelicula.
   Future<void> _cambiarVista(Pelicula pelicula) async {
     try {
-      await _repository.cambiarEstadoVista(pelicula.id!, !pelicula.vista);
+      await widget.facade.cambiarEstadoVista(pelicula.id!, !pelicula.vista);
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -145,6 +162,12 @@ class _HomeScreenState extends State<HomeScreen> {
         SnackBar(content: Text('Error al cambiar estado: $e')),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _buscarController.dispose();
+    super.dispose();
   }
 
   @override
