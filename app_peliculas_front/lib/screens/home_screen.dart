@@ -289,10 +289,11 @@ Future<void> _cargarPeliculas() async {
                       final pelicula = _peliculas[index];
                       return PeliculaCard(
                         pelicula: pelicula,
+                        facade: widget.facade,
                         onEditar: () => _abrirFormulario(pelicula),
                         onEliminar: () => _eliminarPelicula(pelicula),
                         onCambiarVista: () => _cambiarVista(pelicula),
-                      );
+                        );
                     },
                   ),
                 ),
