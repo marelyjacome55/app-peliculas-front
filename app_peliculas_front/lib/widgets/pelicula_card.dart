@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../core/facades/movie_app_facade.dart';
+import '../core/factories/reaccion_ui_factory.dart';
 import '../models/pelicula.dart';
+import '../models/reaccion_pelicula.dart';
 
-class PeliculaCard extends StatelessWidget {
+/// Tarjeta visual para mostrar una película registrada por el usuario.
+///
+/// PATRÓN: Facade
+/// Usa MovieAppFacade para comunicarse con la lógica de la app sin llamar
+/// directamente a servicios o repositorios.
+///
+/// PATRÓN: Factory Method
+/// Usa ReaccionUiFactory para obtener íconos y colores de cada reacción.
+class PeliculaCard extends StatefulWidget {
   final Pelicula pelicula;
+  final MovieAppFacade facade;
   final VoidCallback onEditar;
   final VoidCallback onEliminar;
   final VoidCallback onCambiarVista;
@@ -11,14 +23,195 @@ class PeliculaCard extends StatelessWidget {
   const PeliculaCard({
     super.key,
     required this.pelicula,
+    required this.facade,
     required this.onEditar,
     required this.onEliminar,
     required this.onCambiarVista,
   });
 
   @override
+  State<PeliculaCard> createState() => _PeliculaCardState();
+}
+
+class _PeliculaCardState extends State<PeliculaCard> {
+  final TextEditingController _comentarioController = TextEditingController();
+
+  Set<TipoReaccion> _reaccionesSeleccionadas = {};
+  bool _cargandoReacciones = true;
+  bool _guardandoComentario = false;
+  bool _actualizandoReaccion = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _comentarioController.text = widget.pelicula.comentarioPersonal;
+    _cargarReacciones();
+  }
+
+  @override
+  void didUpdateWidget(covariant PeliculaCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.pelicula.id != widget.pelicula.id) {
+      _comentarioController.text = widget.pelicula.comentarioPersonal;
+      _cargarReacciones();
+    }
+  }
+
+  @override
+  void dispose() {
+    _comentarioController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _cargarReacciones() async {
+    final id = widget.pelicula.id;
+    if (id == null) return;
+
+    setState(() {
+      _cargandoReacciones = true;
+    });
+
+    try {
+      final reacciones = await widget.facade.obtenerReaccionesDePelicula(id);
+
+      if (!mounted) return;
+
+      setState(() {
+        _reaccionesSeleccionadas =
+            reacciones.map((reaccion) => reaccion.tipoReaccion).toSet();
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _reaccionesSeleccionadas = {};
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _cargandoReacciones = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _guardarComentario() async {
+    final id = widget.pelicula.id;
+    if (id == null) return;
+
+    setState(() {
+      _guardandoComentario = true;
+    });
+
+    try {
+      await widget.facade.actualizarComentarioPersonal(
+        id: id,
+        comentarioPersonal: _comentarioController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comentario personal guardado')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar comentario: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _guardandoComentario = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _eliminarComentarioPersonal() async {
+    final id = widget.pelicula.id;
+    if (id == null) return;
+
+    setState(() {
+      _guardandoComentario = true;
+    });
+
+    try {
+      _comentarioController.clear();
+
+      await widget.facade.actualizarComentarioPersonal(
+        id: id,
+        comentarioPersonal: '',
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comentario personal eliminado')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar comentario: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _guardandoComentario = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _alternarReaccion(TipoReaccion tipo) async {
+    final id = widget.pelicula.id;
+    if (id == null || _actualizandoReaccion) return;
+
+    setState(() {
+      _actualizandoReaccion = true;
+    });
+
+    try {
+      final yaSeleccionada = _reaccionesSeleccionadas.contains(tipo);
+
+      final nuevasReacciones = yaSeleccionada
+          ? await widget.facade.eliminarReaccion(
+              id: id,
+              tipoReaccion: tipo,
+            )
+          : await widget.facade.agregarReaccion(
+              id: id,
+              tipoReaccion: tipo,
+            );
+
+      if (!mounted) return;
+
+      setState(() {
+        _reaccionesSeleccionadas =
+            nuevasReacciones.map((reaccion) => reaccion.tipoReaccion).toSet();
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al actualizar reacción: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _actualizandoReaccion = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Color estadoColor = pelicula.vista ? Colors.green : Colors.orange;
+    final Color estadoColor =
+        widget.pelicula.vista ? Colors.green : Colors.orange;
 
     return Card(
       elevation: 3,
@@ -34,9 +227,9 @@ class PeliculaCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(18),
-                  child: pelicula.portada.isNotEmpty
+                  child: widget.pelicula.portada.isNotEmpty
                       ? Image.network(
-                          pelicula.portada,
+                          widget.pelicula.portada,
                           width: 105,
                           height: 145,
                           fit: BoxFit.cover,
@@ -50,16 +243,16 @@ class PeliculaCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        pelicula.nombre,
+                        widget.pelicula.nombre,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text('Género: ${pelicula.genero}'),
+                      Text('Género: ${widget.pelicula.genero}'),
                       const SizedBox(height: 6),
-                      Text('Calificación: ${pelicula.calificacion}'),
+                      Text('Calificación: ${widget.pelicula.calificacion}'),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -67,11 +260,11 @@ class PeliculaCard extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: estadoColor.withOpacity(0.12),
+                          color: estadoColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
-                          pelicula.vista ? 'Vista' : 'Pendiente',
+                          widget.pelicula.vista ? 'Vista' : 'Pendiente',
                           style: TextStyle(
                             color: estadoColor,
                             fontWeight: FontWeight.bold,
@@ -83,8 +276,8 @@ class PeliculaCard extends StatelessWidget {
                 ),
                 PopupMenuButton<String>(
                   onSelected: (value) {
-                    if (value == 'editar') onEditar();
-                    if (value == 'eliminar') onEliminar();
+                    if (value == 'editar') widget.onEditar();
+                    if (value == 'eliminar') widget.onEliminar();
                   },
                   itemBuilder: (context) => const [
                     PopupMenuItem(
@@ -100,23 +293,127 @@ class PeliculaCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
+            _buildComentarioPersonal(),
+            const SizedBox(height: 14),
+            _buildReacciones(),
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: onCambiarVista,
+                onPressed: widget.onCambiarVista,
                 icon: Icon(
-                  pelicula.vista
+                  widget.pelicula.vista
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                 ),
                 label: Text(
-                  pelicula.vista ? 'Marcar pendiente' : 'Marcar vista',
+                  widget.pelicula.vista
+                      ? 'Marcar pendiente'
+                      : 'Marcar vista',
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildComentarioPersonal() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Comentario personal',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _comentarioController,
+          maxLines: 2,
+          decoration: InputDecoration(
+            hintText: 'Escribe tu opinión personal sobre esta película...',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton.icon(
+              onPressed:
+                  _guardandoComentario ? null : _eliminarComentarioPersonal,
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Eliminar'),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: _guardandoComentario ? null : _guardarComentario,
+              icon: _guardandoComentario
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: const Text('Guardar comentario'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReacciones() {
+    if (_cargandoReacciones) {
+      return const Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Mis reacciones (${_reaccionesSeleccionadas.length})',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: TipoReaccion.values.map((tipo) {
+            final seleccionada = _reaccionesSeleccionadas.contains(tipo);
+            final color = ReaccionUiFactory.color(tipo);
+
+            return FilterChip(
+              selected: seleccionada,
+              avatar: Icon(
+                ReaccionUiFactory.icono(tipo),
+                size: 18,
+                color: seleccionada ? color : Colors.black54,
+              ),
+              label: Text(tipo.nombre),
+              onSelected: (_) => _alternarReaccion(tipo),
+              selectedColor: color.withValues(alpha: 0.18),
+              checkmarkColor: color,
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 

@@ -1,62 +1,62 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
+import '../core/network/api_client.dart';
+import '../core/security/session_manager.dart';
+
+/// PATRÓN: Service Layer
+/// Gestiona autenticación. Persiste el token en `SessionManager`.
 class AuthService {
-  static const String baseUrl = 'https://app-peliculas-api.onrender.com';
+  AuthService({ApiClient? apiClient, SessionManager? sessionManager})
+      : _apiClient = apiClient ?? ApiClient(),
+        _sessionManager = sessionManager ?? SessionManager();
 
-  static String? _token;
+  final ApiClient _apiClient;
+  final SessionManager _sessionManager;
 
-  String? get token => _token;
+  /// Token actual en memoria de sesion.
+  String? get token => _sessionManager.token;
 
-  bool get estaAutenticado => _token != null && _token!.isNotEmpty;
+  /// Indica si existe una sesion autenticada activa.
+  bool get estaAutenticado => _sessionManager.isAuthenticated;
 
+  /// Inicia sesion contra la API y persiste el access token.
   Future<void> login({
     required String username,
     required String password,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/signin'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
+    final response = await _apiClient.post(
+      '/api/auth/signin',
+      withAuth: false,
+      body: {
         'username': username,
         'password': password,
-      }),
+      },
     );
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception('Error ${response.statusCode}: ${response.body}');
-    }
-
     final data = jsonDecode(response.body);
-    _token = data['accessToken'];
+    _sessionManager.saveToken((data['accessToken'] ?? '').toString());
   }
 
+  /// Registra un nuevo usuario en el backend.
   Future<void> register({
     required String username,
     required String email,
     required String password,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/signup'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
+    await _apiClient.post(
+      '/api/auth/signup',
+      withAuth: false,
+      body: {
         'username': username,
         'email': email,
         'password': password,
         'role': ['user'],
-      }),
+      },
     );
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception('Error ${response.statusCode}: ${response.body}');
-    }
   }
 
+  /// Cierra sesion y limpia credenciales locales.
   void logout() {
-    _token = null;
+    _sessionManager.clearSession();
   }
 }

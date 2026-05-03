@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
+
+import 'core/facades/movie_app_facade.dart';
+import 'core/factories/app_factory.dart';
 import 'screens/login_screen.dart';
 
+/// Punto de entrada de la aplicacion Flutter.
 void main() {
-  runApp(const AppPeliculas());
+  final MovieAppFacade facade = AppFactory.createMovieAppFacade();
+  runApp(AppPeliculas(facade: facade));
 }
 
+/// Widget raiz que configura tema, rutas iniciales y estilo global.
+///
+/// Patrón creacional usado: Factory.
+/// La aplicación recibe una fachada creada por AppFactory, evitando
+/// construir servicios directamente dentro de las pantallas.
 class AppPeliculas extends StatelessWidget {
-  const AppPeliculas({super.key});
+  const AppPeliculas({
+    super.key,
+    required this.facade,
+  });
+
+  final MovieAppFacade facade;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +54,7 @@ class AppPeliculas extends StatelessWidget {
           ),
         ),
       ),
-      home: const LoginScreen(),
+      home: LoginScreen(facade: facade),
     );
   }
 }

@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/pelicula.dart';
-import '../repositories/pelicula_repository.dart';
+import '../core/facades/movie_app_facade.dart'; 
 
+/// PATRÓN: Facade + Adapter
+/// Delega persistencia a Facade. Las imágenes se convierten mediante Adapter.
 class PeliculaFormSheet extends StatefulWidget {
   final Pelicula? pelicula;
-  final PeliculaRepository repository;
+  final MovieAppFacade facade;
 
   const PeliculaFormSheet({
     super.key,
     this.pelicula,
-    required this.repository,
+    required this.facade,
   });
 
   @override
@@ -28,6 +30,7 @@ class _PeliculaFormSheetState extends State<PeliculaFormSheet> {
   bool _guardando = false;
   XFile? _imagenSeleccionada;
 
+  /// Indica si el formulario esta en modo edicion.
   bool get _esEdicion => widget.pelicula != null;
 
   @override
@@ -41,6 +44,7 @@ class _PeliculaFormSheetState extends State<PeliculaFormSheet> {
     }
   }
 
+  /// Permite seleccionar imagen desde galeria para el payload multipart.
   Future<void> _seleccionarImagen() async {
     final ImagePicker picker = ImagePicker();
     final XFile? imagen = await picker.pickImage(
@@ -55,6 +59,7 @@ class _PeliculaFormSheetState extends State<PeliculaFormSheet> {
     }
   }
 
+  /// Valida el formulario y persiste los datos via repositorio.
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -77,7 +82,7 @@ class _PeliculaFormSheetState extends State<PeliculaFormSheet> {
       final calificacion = double.parse(_calificacionController.text.trim());
 
       if (_esEdicion) {
-        await widget.repository.editarPelicula(
+        await widget.facade.editarPelicula(
           id: widget.pelicula!.id!,
           nombre: nombre,
           genero: genero,
@@ -86,7 +91,7 @@ class _PeliculaFormSheetState extends State<PeliculaFormSheet> {
           imagen: _imagenSeleccionada,
         );
       } else {
-        await widget.repository.crearPelicula(
+        await widget.facade.crearPelicula(
           nombre: nombre,
           genero: genero,
           calificacion: calificacion,

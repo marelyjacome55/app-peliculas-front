@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
 
+import '../core/facades/movie_app_facade.dart';
+
+/// Pantalla de alta de usuarios nuevos.
+///
+/// Esta pantalla usa la fachada principal en lugar de crear directamente
+/// AuthService. Así se mantiene el patrón Facade.
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({
+    super.key,
+    required this.facade,
+  });
+
+  final MovieAppFacade facade;
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -15,12 +25,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmarPasswordController = TextEditingController();
 
-  final AuthService _authService = AuthService();
-
   bool _cargando = false;
   bool _ocultarPassword = true;
   bool _ocultarConfirmacion = true;
 
+  /// Valida el formulario y registra al usuario en la API.
   Future<void> _registrar() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -29,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      await _authService.register(
+      await widget.facade.registrarUsuario(
         username: _usernameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -54,6 +63,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmarPasswordController.dispose();
+    super.dispose();
   }
 
   @override

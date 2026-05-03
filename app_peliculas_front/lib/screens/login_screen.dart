@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+
+import '../core/facades/movie_app_facade.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
-import '../services/auth_service.dart';
 
+/// Pantalla de inicio de sesion para acceder a funcionalidades protegidas.
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, required this.facade});
+
+  final MovieAppFacade facade;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -15,11 +19,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  final AuthService _authService = AuthService();
-
   bool _cargando = false;
   bool _ocultarPassword = true;
 
+  /// Ejecuta validacion de formulario y autenticacion contra la fachada.
   Future<void> _iniciarSesion() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -28,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _authService.login(
+      await widget.facade.iniciarSesion(
         username: _usernameController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -37,7 +40,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(
+          builder: (_) => HomeScreen(facade: widget.facade),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -53,11 +58,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// Navega a la pantalla de registro de nuevo usuario.
   void _abrirRegistro() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+      MaterialPageRoute(
+        builder: (_) => RegisterScreen(facade: widget.facade),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
