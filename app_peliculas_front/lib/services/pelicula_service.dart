@@ -9,8 +9,11 @@ import '../models/pelicula.dart';
 import '../models/reaccion_pelicula.dart';
 import '../models/resumen_reaccion.dart';
 
+/// Servicio remoto para operaciones CRUD, filtros, comentarios y reacciones.
+///
 /// PATRÓN: Service Layer
-/// Centraliza la comunicación con la API. Evita que la UI haga peticiones HTTP directamente.
+/// Centraliza la comunicación con la API para que la interfaz no haga
+/// peticiones HTTP directamente.
 class PeliculaService {
   PeliculaService({
     ApiClient? apiClient,
@@ -21,38 +24,16 @@ class PeliculaService {
   final ApiClient _apiClient;
   final MultipartImageAdapter _imageAdapter;
 
-  /// Construye URIs completas a partir de rutas relativas de API.
   Uri _buildUri(String path, [Map<String, dynamic>? query]) {
-<<<<<<< HEAD
     return _apiClient.buildUri(path, query);
-=======
-    return Uri.parse('$baseUrl$path').replace(
-      queryParameters: query?.map(
-        (key, value) => MapEntry(key, value.toString()),
-      ),
-    );
   }
 
-  Map<String, String> _headersAuth() {
-    final token = _authService.token;
-    if (token == null || token.isEmpty) {
-      throw Exception('No hay sesión activa');
-    }
-
-    return {
-      'Authorization': 'Bearer $token',
-    };
->>>>>>> 4ccc895 (Corregir análisis Flutter antes de generar APK)
-  }
-
-  /// Obtiene todas las peliculas del usuario autenticado.
   Future<List<Pelicula>> obtenerPeliculas() async {
     final response = await _apiClient.get('/api/peliculas');
     final List<dynamic> data = jsonDecode(response.body);
     return data.map((e) => Pelicula.fromJson(e)).toList();
   }
 
-  /// Busca peliculas por nombre usando endpoint de busqueda.
   Future<List<Pelicula>> buscarPorNombre(String nombre) async {
     final response = await _apiClient.get(
       '/api/peliculas/buscar',
@@ -62,7 +43,6 @@ class PeliculaService {
     return data.map((e) => Pelicula.fromJson(e)).toList();
   }
 
-  /// Filtra peliculas por estado de visualizacion.
   Future<List<Pelicula>> filtrarPorVista(bool vista) async {
     final response = await _apiClient.get(
       '/api/peliculas/filtrar',
@@ -72,7 +52,6 @@ class PeliculaService {
     return data.map((e) => Pelicula.fromJson(e)).toList();
   }
 
-  /// Crea una nueva pelicula con subida de imagen en multipart/form-data.
   Future<Pelicula> crearPelicula({
     required String nombre,
     required String genero,
@@ -100,7 +79,6 @@ class PeliculaService {
     return Pelicula.fromJson(jsonDecode(response.body));
   }
 
-  /// Actualiza campos de una pelicula y opcionalmente su imagen.
   Future<Pelicula> editarPelicula({
     required int id,
     required String nombre,
@@ -135,12 +113,10 @@ class PeliculaService {
     return Pelicula.fromJson(jsonDecode(response.body));
   }
 
-  /// Elimina una pelicula por id.
   Future<void> eliminarPelicula(int id) async {
     await _apiClient.delete('/api/peliculas/$id');
   }
 
-  /// Alterna el estado de vista de una pelicula.
   Future<Pelicula> cambiarEstadoVista(int id, bool vista) async {
     final response = await _apiClient.patch(
       '/api/peliculas/$id/vista',
@@ -150,7 +126,6 @@ class PeliculaService {
     return Pelicula.fromJson(jsonDecode(response.body));
   }
 
-  /// Actualiza el comentario personal privado de una película.
   Future<Pelicula> actualizarComentarioPersonal({
     required int id,
     required String comentarioPersonal,
@@ -165,14 +140,12 @@ class PeliculaService {
     return Pelicula.fromJson(jsonDecode(response.body));
   }
 
-  /// Obtiene las reacciones seleccionadas de una película.
   Future<List<ReaccionPelicula>> obtenerReaccionesDePelicula(int id) async {
     final response = await _apiClient.get('/api/peliculas/$id/reacciones');
     final List<dynamic> data = jsonDecode(response.body);
     return data.map((e) => ReaccionPelicula.fromJson(e)).toList();
   }
 
-  /// Agrega una reacción a una película.
   Future<List<ReaccionPelicula>> agregarReaccion({
     required int id,
     required TipoReaccion tipoReaccion,
@@ -185,7 +158,6 @@ class PeliculaService {
     return data.map((e) => ReaccionPelicula.fromJson(e)).toList();
   }
 
-  /// Elimina una reacción de una película.
   Future<List<ReaccionPelicula>> eliminarReaccion({
     required int id,
     required TipoReaccion tipoReaccion,
@@ -198,14 +170,12 @@ class PeliculaService {
     return data.map((e) => ReaccionPelicula.fromJson(e)).toList();
   }
 
-  /// Obtiene el resumen estadístico de la pantalla "Mis reacciones".
   Future<List<ResumenReaccion>> obtenerMisReacciones() async {
     final response = await _apiClient.get('/api/mis-reacciones');
     final List<dynamic> data = jsonDecode(response.body);
     return data.map((e) => ResumenReaccion.fromJson(e)).toList();
   }
 
-  /// Obtiene las películas que pertenecen a una colección de reacción.
   Future<List<Pelicula>> obtenerPeliculasPorReaccion(
     TipoReaccion tipoReaccion,
   ) async {
