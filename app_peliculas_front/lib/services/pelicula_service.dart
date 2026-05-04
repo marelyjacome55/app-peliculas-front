@@ -23,7 +23,26 @@ class PeliculaService {
 
   /// Construye URIs completas a partir de rutas relativas de API.
   Uri _buildUri(String path, [Map<String, dynamic>? query]) {
+<<<<<<< HEAD
     return _apiClient.buildUri(path, query);
+=======
+    return Uri.parse('$baseUrl$path').replace(
+      queryParameters: query?.map(
+        (key, value) => MapEntry(key, value.toString()),
+      ),
+    );
+  }
+
+  Map<String, String> _headersAuth() {
+    final token = _authService.token;
+    if (token == null || token.isEmpty) {
+      throw Exception('No hay sesión activa');
+    }
+
+    return {
+      'Authorization': 'Bearer $token',
+    };
+>>>>>>> 4ccc895 (Corregir análisis Flutter antes de generar APK)
   }
 
   /// Obtiene todas las peliculas del usuario autenticado.
