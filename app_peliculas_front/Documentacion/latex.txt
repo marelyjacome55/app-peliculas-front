@@ -1,0 +1,784 @@
+\documentclass[12pt,letterpaper]{article}
+
+% =========================
+% PAQUETES BÁSICOS
+% =========================
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{url}
+
+% =========================
+% PAQUETES PARA TABLAS
+% =========================
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+
+% =========================
+% PAQUETES PARA IMÁGENES
+% =========================
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{caption}
+
+% =========================
+% PAQUETES PARA CÓDIGO Y ESTILO
+% =========================
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+
+% =========================
+% CONFIGURACIÓN DE PÁGINA
+% =========================
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm
+}
+
+\onehalfspacing
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black
+}
+
+\captionsetup{
+    font=small,
+    labelfont=bf
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.7em}
+
+\renewcommand{\arraystretch}{1.25}
+
+% =========================
+% RUTAS DE IMÁGENES
+% =========================
+% Puedes dejar las imágenes en la misma carpeta del .tex
+% o dentro de una carpeta llamada imagenes.
+\graphicspath{{./}{imagenes/}}
+
+% =========================
+% ESTILO PARA BLOQUES DE CÓDIGO
+% =========================
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!8},
+    columns=fullflexible
+}
+
+% =========================
+% COLUMNAS PERSONALIZADAS PARA TABLAS
+% =========================
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% =========================
+% COMANDO PARA IMÁGENES
+% =========================
+% Uso:
+% \evidencia[0.80]{nombre_imagen.png}{Texto del caption}
+% El primer parámetro es opcional y controla el ancho.
+\newcommand{\evidencia}[3][0.82]{
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=#1\textwidth,keepaspectratio]{\detokenize{#2}}
+    \caption{#3}
+\end{figure}
+\FloatBarrier
+}
+
+% =========================
+% DATOS DEL DOCUMENTO
+% =========================
+\title{\textbf{Documentación de patrones de diseño y principios SOLID utilizados en el proyecto}\\
+\large App Películas por Ver}
+\author{Marely Jacome Hernandez}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% =========================================================
+\section{Introducción}
+% =========================================================
+
+En este documento explico los patrones de diseño y principios SOLID que utilicé en mi proyecto \textit{App Películas por Ver}. La aplicación permite registrar películas, subir portadas, marcar si una película ya fue vista, agregar un comentario personal y seleccionar diferentes reacciones.
+
+El proyecto está dividido en dos partes principales: el frontend, desarrollado con Flutter, y la API, desarrollada con Spring Boot. Como estudiante principiante, entendí que los patrones y SOLID ayudan a que el código esté más ordenado, sea más fácil de entender y pueda modificarse con menos problemas.
+
+\newpage
+
+% =========================================================
+\section{Resumen general de patrones utilizados}
+% =========================================================
+
+\begin{longtable}{P{3.2cm} P{4.2cm} P{6.5cm}}
+\caption{Patrones y componentes arquitectónicos utilizados en el proyecto}\\
+\toprule
+\textbf{Patrón} & \textbf{Dónde se usó} & \textbf{Propósito en el proyecto} \\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Patrón} & \textbf{Dónde se usó} & \textbf{Propósito en el proyecto} \\
+\midrule
+\endhead
+
+Repository & Frontend y API & Separar el acceso a datos de la interfaz y de la lógica principal. \\
+
+Service Layer & Frontend y API & Organizar la lógica de comunicación y reglas del sistema. \\
+
+Facade & Frontend & Simplificar el acceso de las pantallas a servicios, repositorios y autenticación. \\
+
+Factory Method & Frontend y API & Centralizar la creación de objetos, respuestas y elementos visuales. \\
+
+Strategy & Frontend & Organizar los filtros de películas en clases separadas. \\
+
+Adapter & Frontend & Convertir imágenes seleccionadas al formato que necesita la API. \\
+
+Singleton & Frontend & Mantener una única instancia para manejar la sesión del usuario. \\
+
+DTO / Model & Frontend y API & Transportar datos entre capas sin exponer directamente toda la estructura interna. \\
+
+MVC & API & Separar modelos, controladores y lógica del backend. \\
+
+Security Filter & API & Validar el token de autenticación antes de permitir acceso a rutas protegidas. \\
+
+\bottomrule
+\end{longtable}
+
+\FloatBarrier
+
+% =========================================================
+\section{Principios SOLID aplicados en el proyecto}
+% =========================================================
+
+Además de los patrones de diseño, en el proyecto también se aplicaron algunos principios SOLID. SOLID es un conjunto de principios que ayudan a que el código sea más ordenado, fácil de mantener y menos dependiente entre clases.
+
+Como estudiante principiante, entiendo SOLID como una guía para que cada parte del sistema tenga una responsabilidad clara y para evitar que una clase haga demasiadas cosas al mismo tiempo.
+
+Es importante aclarar que SOLID no es un patrón de diseño, sino un conjunto de principios. Por esa razón, en este documento lo separo de la tabla de patrones utilizados.
+
+\begin{longtable}{P{3.5cm} P{4.2cm} P{6.2cm}}
+\caption{Principios SOLID aplicados en el proyecto}\\
+\toprule
+\textbf{Principio} & \textbf{Dónde se aplicó} & \textbf{Propósito en el proyecto} \\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Principio} & \textbf{Dónde se aplicó} & \textbf{Propósito en el proyecto} \\
+\midrule
+\endhead
+
+Single Responsibility Principle & Frontend y API & Separar responsabilidades para que cada clase tenga una función principal. \\
+
+Open/Closed Principle & Frontend & Permitir agregar nuevos filtros o nuevas reacciones sin modificar demasiado el código existente. \\
+
+Liskov Substitution Principle & Frontend & Permitir que las implementaciones concretas puedan usarse donde se espera una abstracción. \\
+
+Interface Segregation Principle & Frontend & Evitar que las pantallas dependan directamente de clases grandes o de detalles internos. \\
+
+Dependency Inversion Principle & Frontend y API & Hacer que las clases dependan de abstracciones o dependencias inyectadas, no de objetos creados directamente dentro de ellas. \\
+
+\bottomrule
+\end{longtable}
+
+\FloatBarrier
+
+% ---------------------------------------------------------
+\subsection{Single Responsibility Principle}
+% ---------------------------------------------------------
+
+\subsubsection{Cómo se usa de manera general}
+
+El principio de responsabilidad única, conocido como \textit{Single Responsibility Principle}, indica que una clase debe tener una sola responsabilidad principal.
+
+Yo lo entiendo como que una clase no debería encargarse de todo. Si una clase muestra información, no debería también conectarse directamente a la API, validar tokens, guardar datos y manejar toda la lógica de negocio.
+
+\subsubsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo apliqué separando el proyecto en diferentes capas y archivos. Por ejemplo:
+
+\begin{lstlisting}
+screens
+widgets
+services
+repositories
+models
+core/facades
+core/network
+core/strategies
+\end{lstlisting}
+
+Cada carpeta tiene una responsabilidad diferente. Las pantallas muestran la información, los servicios se comunican con la API, los repositorios separan el acceso a datos, los modelos representan información y las estrategias ayudan a organizar los filtros.
+
+También se aplicó en la API, porque el backend está dividido en:
+
+\begin{lstlisting}
+controllers
+models
+repository
+service
+security
+payload
+\end{lstlisting}
+
+Por ejemplo, \texttt{PeliculaController.java} recibe peticiones relacionadas con películas, pero no debería encargarse de toda la lógica interna. Esa lógica se delega a servicios o repositorios.
+
+\subsubsection{Para qué lo usé}
+
+Lo usé para que el código fuera más fácil de entender. Si necesito modificar algo de las reacciones, puedo buscar en las clases relacionadas con reacciones. Si necesito modificar algo de autenticación, puedo buscar en los archivos de autenticación.
+
+Esto evita que todo el código esté mezclado en una sola clase.
+
+% ---------------------------------------------------------
+\subsection{Open/Closed Principle}
+% ---------------------------------------------------------
+
+\subsubsection{Cómo se usa de manera general}
+
+El principio abierto/cerrado, conocido como \textit{Open/Closed Principle}, indica que una clase debería estar abierta para extenderse, pero cerrada para modificarse.
+
+Yo lo entiendo como que debería poder agregar nuevas funciones sin tener que cambiar demasiado el código que ya funciona.
+
+\subsubsection{Cómo lo usé en mi proyecto}
+
+En el frontend se aplicó principalmente con el patrón Strategy en los filtros de películas.
+
+El archivo:
+
+\begin{lstlisting}
+lib/core/strategies/movie_filter_strategy.dart
+\end{lstlisting}
+
+contiene diferentes estrategias como:
+
+\begin{lstlisting}
+AllMoviesStrategy
+WatchedMoviesStrategy
+PendingMoviesStrategy
+SearchMoviesStrategy
+\end{lstlisting}
+
+Gracias a esto, si en el futuro quisiera agregar otro filtro, por ejemplo ``películas mejor calificadas'', podría crear una nueva estrategia sin modificar toda la pantalla principal.
+
+También se puede observar en las reacciones. Las reacciones tienen una fábrica visual en:
+
+\begin{lstlisting}
+lib/core/factories/reaccion_ui_factory.dart
+\end{lstlisting}
+
+Si quisiera cambiar el ícono o color de una reacción, lo puedo hacer desde esa fábrica sin modificar todas las pantallas donde se muestran reacciones.
+
+\subsubsection{Para qué lo usé}
+
+Lo usé para que el proyecto pudiera crecer sin romper partes que ya estaban funcionando. Esto es útil porque la app puede seguir agregando nuevas opciones, filtros o elementos visuales de forma más ordenada.
+
+% ---------------------------------------------------------
+\subsection{Liskov Substitution Principle}
+% ---------------------------------------------------------
+
+\subsubsection{Cómo se usa de manera general}
+
+El principio de sustitución de Liskov indica que una clase hija o implementación concreta debe poder usarse en lugar de su clase base o abstracción sin que el programa falle.
+
+Yo lo entiendo como que si una clase promete cumplir cierto comportamiento, cualquier implementación debe respetar ese comportamiento.
+
+\subsubsection{Cómo lo usé en mi proyecto}
+
+En el frontend se aplicó con el repositorio de películas.
+
+Existe una abstracción llamada:
+
+\begin{lstlisting}
+PeliculaRepository
+\end{lstlisting}
+
+y una implementación concreta llamada:
+
+\begin{lstlisting}
+RemotePeliculaRepository
+\end{lstlisting}
+
+La interfaz trabaja con \texttt{PeliculaRepository}, pero realmente puede usar \texttt{RemotePeliculaRepository} porque esta implementación cumple con los métodos esperados.
+
+También se puede observar en las estrategias de filtrado. Todas las estrategias implementan la misma estructura de \texttt{MovieFilterStrategy}. Por eso la pantalla puede trabajar con una estrategia sin importar si es para obtener todas las películas, las vistas, las pendientes o buscar por nombre.
+
+\subsubsection{Para qué lo usé}
+
+Lo usé para que el código pudiera trabajar con abstracciones. Esto permite que en el futuro se pueda cambiar una implementación por otra sin modificar toda la aplicación.
+
+Por ejemplo, si algún día quisiera usar una base de datos local en lugar de una API remota, podría crear otra implementación del repositorio respetando la misma estructura.
+
+% ---------------------------------------------------------
+\subsection{Interface Segregation Principle}
+% ---------------------------------------------------------
+
+\subsubsection{Cómo se usa de manera general}
+
+El principio de segregación de interfaces indica que una clase no debería depender de métodos que no necesita.
+
+Yo lo entiendo como que es mejor tener contratos claros y útiles, en lugar de obligar a una clase a conocer demasiadas cosas que no usa.
+
+\subsubsection{Cómo lo usé en mi proyecto}
+
+En mi proyecto este principio se aplicó de forma parcial, principalmente al evitar que las pantallas usen directamente todos los servicios internos.
+
+Por ejemplo, las pantallas no dependen directamente de \texttt{PeliculaService}, \texttt{AuthService}, \texttt{ApiClient} o \texttt{SessionManager}. En lugar de eso, usan \texttt{MovieAppFacade}, que les ofrece solamente las operaciones necesarias para la interfaz.
+
+También se observa en el uso de modelos y DTOs, porque no siempre se envía o recibe toda la entidad completa. Por ejemplo, para actualizar un comentario personal se usa un objeto específico con el comentario, en lugar de obligar a enviar todos los datos de la película.
+
+\subsubsection{Para qué lo usé}
+
+Lo usé para que las pantallas dependieran de operaciones más claras y no de todos los detalles internos del sistema.
+
+Aunque este principio no está aplicado de forma perfecta en todo el proyecto, sí ayudó a reducir dependencias innecesarias entre la interfaz y las clases internas.
+
+% ---------------------------------------------------------
+\subsection{Dependency Inversion Principle}
+% ---------------------------------------------------------
+
+\subsubsection{Cómo se usa de manera general}
+
+El principio de inversión de dependencias indica que las clases de alto nivel no deberían depender directamente de clases concretas de bajo nivel, sino de abstracciones.
+
+No es lo mismo que inyección de dependencias. La inversión de dependencias es un principio de SOLID, mientras que la inyección de dependencias es una técnica que ayuda a aplicarlo.
+
+\subsubsection{Cómo lo usé en mi proyecto}
+
+En el frontend se aplicó cuando \texttt{MovieAppFacade} trabaja con la abstracción \texttt{PeliculaRepository}, en lugar de depender directamente de una implementación concreta.
+
+Esto permite que la fachada no tenga que saber exactamente cómo se obtienen los datos. Solo sabe que existe un repositorio que cumple con ciertos métodos.
+
+En la API Spring Boot también se aplicó mediante la inyección de dependencias por constructor. Por ejemplo, los controladores y servicios reciben objetos como:
+
+\begin{lstlisting}
+PeliculaRepository
+PeliculaReaccionRepository
+CloudinaryService
+UserRepository
+\end{lstlisting}
+
+Spring Boot se encarga de inyectar esas dependencias automáticamente, por lo que las clases no tienen que crearlas manualmente con \texttt{new}.
+
+\subsubsection{Para qué lo usé}
+
+Lo usé para reducir el acoplamiento entre clases. Esto significa que una clase no depende tanto de cómo se construye otra clase, sino que recibe lo que necesita desde afuera.
+
+Esto hace que el proyecto sea más fácil de mantener y modificar, porque si cambia una implementación, no necesariamente se tiene que cambiar toda la aplicación.
+
+\FloatBarrier
+
+\newpage
+
+% =========================================================
+\section{Repository}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+El patrón Repository, o patrón Repositorio, se utiliza para separar la forma en que se obtienen los datos del resto de la aplicación. En lugar de que una pantalla o controlador consulte directamente una base de datos o una API, se crea una capa intermedia llamada repositorio.
+
+Yo lo entiendo como una especie de intermediario entre la aplicación y la fuente de datos. La aplicación pide la información al repositorio, y el repositorio se encarga de obtenerla.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo utilicé en el archivo:
+
+\begin{lstlisting}
+lib/repositories/pelicula_repository.dart
+\end{lstlisting}
+
+Ahí se creó una abstracción llamada \texttt{PeliculaRepository}, donde se definen operaciones como obtener películas, crear películas, editar películas, eliminar películas, agregar reacciones y obtener las estadísticas de ``Mis reacciones''.
+
+\evidencia[0.78]{pelicula_repository.png}{Implementación del patrón Repository en el archivo \texttt{pelicula\_repository.dart}.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para que la interfaz no tuviera que saber directamente cómo se obtienen los datos. Por ejemplo, la pantalla principal no necesita saber cómo se hace una petición HTTP; solamente pide las películas al repositorio.
+
+Esto ayuda a que el código esté más ordenado y sea más fácil cambiar la forma de obtener datos en el futuro.
+
+% =========================================================
+\section{Service Layer}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+El patrón Service Layer, o Capa de Servicio, sirve para concentrar la lógica principal de la aplicación en una capa separada. La idea es que los controladores o pantallas no tengan toda la lógica mezclada.
+
+En otras palabras, el servicio se encarga de decidir qué hacer, mientras que la pantalla o el controlador solo llaman al servicio.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo utilicé en:
+
+\begin{lstlisting}
+lib/services/pelicula_service.dart
+lib/services/auth_service.dart
+\end{lstlisting}
+
+El archivo \texttt{pelicula\_service.dart} se encarga de comunicarse con la API para obtener películas, crear películas, editar películas, guardar comentarios personales y manejar reacciones.
+
+El archivo \texttt{auth\_service.dart} se encarga del inicio de sesión, registro y manejo del token del usuario.
+
+\evidencia[0.78]{pelicula_service.png}{Implementación de la capa de servicio en \texttt{pelicula\_service.dart}.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para separar la lógica de comunicación con la API de las pantallas. Así, la interfaz no tiene que conocer todos los detalles de las peticiones HTTP ni de cómo se procesan las respuestas.
+
+\newpage
+
+% =========================================================
+\section{Facade Pattern}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+El patrón Facade, o Fachada, sirve para simplificar el acceso a varias clases o servicios. En vez de que una pantalla tenga que comunicarse con muchas clases diferentes, se crea una fachada que centraliza esas operaciones.
+
+Yo lo entiendo como una entrada principal para usar varias partes del sistema sin tener que conocer todos los detalles internos.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo utilicé en:
+
+\begin{lstlisting}
+lib/core/facades/movie_app_facade.dart
+\end{lstlisting}
+
+La clase \texttt{MovieAppFacade} centraliza operaciones relacionadas con autenticación, películas, comentarios personales y reacciones.
+
+\evidencia[0.78]{movie_app_facade.png}{Fachada principal del frontend mediante la clase \texttt{MovieAppFacade}.}
+
+También se aplicó una fachada técnica en:
+
+\begin{lstlisting}
+lib/core/network/api_client.dart
+\end{lstlisting}
+
+La clase \texttt{ApiClient} centraliza las peticiones HTTP, los encabezados, el token de autenticación y la validación de respuestas.
+
+\evidencia[0.78]{api_client.png}{Fachada técnica para centralizar las peticiones HTTP mediante \texttt{ApiClient}.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para que las pantallas no llamen directamente a muchas clases. Por ejemplo, desde una pantalla puedo usar:
+
+\begin{lstlisting}
+facade.obtenerPeliculas()
+facade.agregarReaccion()
+facade.actualizarComentarioPersonal()
+\end{lstlisting}
+
+sin preocuparme por cómo se conecta internamente con la API.
+
+Esto hace que el código de las pantallas sea más limpio.
+
+% =========================================================
+\section{Factory Method}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+El patrón Factory Method, o Método Fábrica, se usa para centralizar la creación de objetos. En lugar de crear objetos manualmente en varias partes del código, se crea un método encargado de construirlos.
+
+Esto ayuda a evitar código repetido.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo usé en los modelos:
+
+\begin{lstlisting}
+lib/models/pelicula.dart
+lib/models/reaccion_pelicula.dart
+lib/models/resumen_reaccion.dart
+\end{lstlisting}
+
+Por ejemplo, \texttt{Pelicula.fromJson()} sirve para crear un objeto \texttt{Pelicula} a partir de la respuesta JSON que llega desde la API.
+
+\evidencia[0.78]{models_pelicula.png}{Método de creación de objetos en el modelo \texttt{Pelicula}.}
+
+\evidencia[0.78]{models_reaccion.png}{Método de creación de objetos en el modelo \texttt{ReaccionPelicula}.}
+
+\evidencia[0.78]{resumen_reaccion.png}{Método de creación de objetos en el modelo \texttt{ResumenReaccion}.}
+
+También se relaciona con la creación de elementos visuales para las reacciones mediante:
+
+\begin{lstlisting}
+lib/core/factories/reaccion_ui_factory.dart
+\end{lstlisting}
+
+\subsection{Para qué lo usé}
+
+Lo usé para no repetir la lógica de creación de objetos o elementos visuales.
+
+Por ejemplo, si quiero cambiar el ícono de ``Me gusta'', solo tendría que modificarlo en \texttt{ReaccionUiFactory}, no en varias pantallas.
+
+\newpage
+
+% =========================================================
+\section{Strategy Pattern}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+El patrón Strategy, o Estrategia, permite tener diferentes formas de realizar una misma acción. Cada forma se separa en una clase distinta.
+
+Sirve para evitar que una clase tenga demasiados condicionales como \texttt{if} o \texttt{switch}.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo usé en:
+
+\begin{lstlisting}
+lib/core/strategies/movie_filter_strategy.dart
+\end{lstlisting}
+
+Ahí se crearon diferentes estrategias para filtrar películas:
+
+\begin{lstlisting}
+AllMoviesStrategy
+WatchedMoviesStrategy
+PendingMoviesStrategy
+SearchMoviesStrategy
+\end{lstlisting}
+
+Cada una representa una forma distinta de consultar películas.
+
+\evidencia[0.78]{Paton_Strategy.png}{Implementación del patrón Strategy para organizar los filtros de películas.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para organizar mejor los filtros de la pantalla principal.
+
+Por ejemplo, una estrategia obtiene todas las películas, otra obtiene solo las vistas, otra obtiene las pendientes y otra busca por nombre.
+
+Esto ayuda a que la pantalla principal no tenga toda la lógica de filtrado mezclada.
+
+% =========================================================
+\section{Adapter Pattern}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+El patrón Adapter, o Adaptador, se usa cuando una parte del sistema tiene un formato de datos, pero otra parte necesita un formato diferente.
+
+El adaptador se encarga de convertir un formato en otro.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo usé en:
+
+\begin{lstlisting}
+lib/core/adapters/multipart_image_adapter.dart
+\end{lstlisting}
+
+La aplicación selecciona imágenes como objetos \texttt{XFile}, pero para enviarlas a la API se necesita convertirlas a \texttt{MultipartFile}.
+
+Entonces el adaptador hace esta conversión:
+
+\begin{lstlisting}
+XFile -> MultipartFile
+\end{lstlisting}
+
+\evidencia[0.78]{patron_adapter.png}{Adaptador encargado de convertir imágenes \texttt{XFile} a \texttt{MultipartFile}.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para que la lógica de conversión de imágenes no estuviera repetida dentro del servicio de películas.
+
+Esto fue útil porque mi app permite subir portadas de películas a Cloudinary mediante la API.
+
+% =========================================================
+\section{Singleton Pattern}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+El patrón Singleton permite que una clase tenga una sola instancia compartida en toda la aplicación.
+
+Se utiliza cuando se necesita manejar información global, como una sesión, una configuración o un token.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo usé en:
+
+\begin{lstlisting}
+lib/core/security/session_manager.dart
+\end{lstlisting}
+
+La clase \texttt{SessionManager} se encarga de guardar y proporcionar el token de autenticación del usuario.
+
+\evidencia[0.78]{Patron_singleton.png}{Uso del patrón Singleton para manejar la sesión del usuario mediante \texttt{SessionManager}.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para manejar la sesión del usuario desde una sola instancia.
+
+Esto permite que el \texttt{ApiClient} pueda tomar el token y enviarlo en las peticiones a la API.
+
+\newpage
+
+% =========================================================
+\section{DTO / Model}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+DTO significa \textit{Data Transfer Object}, que en español se puede entender como Objeto de Transferencia de Datos.
+
+Este patrón se usa para transportar información entre capas o entre el frontend y el backend sin exponer directamente toda la estructura interna del sistema.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En el frontend lo usé en modelos como:
+
+\begin{lstlisting}
+Pelicula
+ReaccionPelicula
+ResumenReaccion
+\end{lstlisting}
+
+Estos modelos representan los datos que llegan desde la API.
+
+\evidencia[0.86]{Captura desde 2026-05-07 15-38-51.png}{Modelo utilizado para representar y transportar información dentro del frontend.}
+
+\evidencia[0.90]{Captura desde 2026-05-07 15-42-10.png}{DTO utilizado para transportar información de respuesta entre la API y el frontend.}
+
+\evidencia[0.90]{Captura desde 2026-05-07 15-44-27.png}{DTO utilizado para estructurar información relacionada con reacciones de películas.}
+
+En la API lo usé en archivos como:
+
+\begin{lstlisting}
+ComentarioPersonalRequest.java
+PeliculaReaccionResponse.java
+ReaccionResumenResponse.java
+PeliculaEnReaccionResponse.java
+LoginRequest.java
+SignupRequest.java
+JwtResponse.java
+MessageResponse.java
+\end{lstlisting}
+
+\evidencia[0.90]{Captura desde 2026-05-07 15-50-59.png}{DTO de la API utilizado para organizar datos enviados o recibidos por el sistema.}
+
+\evidencia[0.90]{Captura desde 2026-05-07 15-52-25.png}{DTO de autenticación o respuesta utilizado para controlar los datos que salen de la API.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para controlar qué información entra y sale del sistema.
+
+Por ejemplo, para actualizar un comentario personal no necesito mandar toda la película, sino solo el comentario. También para la pantalla de ``Mis reacciones'' se envía un resumen con el tipo de reacción, el nombre visible y el total.
+
+\newpage
+
+% =========================================================
+\section{MVC}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+MVC significa Modelo Vista Controlador. Es un patrón que separa la aplicación en partes.
+
+El modelo representa los datos, la vista muestra la información al usuario y el controlador recibe solicitudes y coordina la respuesta.
+
+En una API, la vista no siempre aparece igual que en una aplicación visual, pero sí se mantiene la idea de separar controladores, modelos y lógica de datos.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En la API Spring Boot se usó mediante la separación de:
+
+\begin{lstlisting}
+controllers
+models
+repository
+service
+\end{lstlisting}
+
+Los controladores están en archivos como:
+
+\begin{lstlisting}
+PeliculaController.java
+PeliculaReaccionController.java
+AuthController.java
+\end{lstlisting}
+
+\evidencia[0.90]{Captura desde 2026-05-07 15-53-49.png}{Controlador de la API encargado de recibir peticiones HTTP relacionadas con películas.}
+
+\evidencia[0.90]{Captura desde 2026-05-07 15-54-47.png}{Controlador de la API encargado de coordinar operaciones del backend.}
+
+Los modelos están en:
+
+\begin{lstlisting}
+Pelicula.java
+PeliculaReaccion.java
+User.java
+Role.java
+\end{lstlisting}
+
+\evidencia[0.90]{Captura desde 2026-05-07 15-55-38.png}{Estructura del backend donde se observa la separación entre controladores, modelos, repositorios y servicios.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para que la API estuviera organizada por responsabilidades.
+
+Los controladores reciben las peticiones HTTP, los modelos representan las tablas o entidades y los servicios/repositorios se encargan de la lógica y acceso a datos.
+
+\newpage
+
+% =========================================================
+\section{Security Filter}
+% =========================================================
+
+\subsection{Cómo se usa de manera general}
+
+Un Security Filter, o Filtro de Seguridad, intercepta las peticiones antes de que lleguen a los controladores.
+
+Se usa para revisar si una petición tiene permiso para continuar.
+
+\subsection{Cómo lo usé en mi proyecto}
+
+En la API lo usé en:
+
+\begin{lstlisting}
+AuthTokenFilter.java
+\end{lstlisting}
+
+Este filtro valida el token JWT.
+
+JWT significa \textit{JSON Web Token}, que es un token usado para identificar al usuario autenticado.
+
+\evidencia[0.86]{Captura desde 2026-05-07 15-57-26.png}{Filtro de seguridad \texttt{AuthTokenFilter.java}, encargado de validar el token JWT antes de permitir el acceso a rutas protegidas.}
+
+\subsection{Para qué lo usé}
+
+Lo usé para proteger las rutas de la API.
+
+Antes de que un usuario pueda crear, editar, eliminar o consultar películas, el sistema revisa si tiene un token válido.
+
+% =========================================================
+\section{Conclusión}
+% =========================================================
+
+En conclusión, aplicar patrones de diseño y principios SOLID en la construcción del proyecto me ayudó a tener un código más organizado, reutilizable y fácil de mantener.
+
+En este proyecto aprendí que los patrones de diseño no deben usarse solo por cumplir un requisito, sino porque ayudan a separar responsabilidades dentro del sistema. También comprendí que SOLID no es un conjunto de patrones, sino una guía de principios para escribir código más claro y menos acoplado.
+
+\end{document}
